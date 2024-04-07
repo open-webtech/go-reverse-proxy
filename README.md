@@ -9,6 +9,7 @@ it allows for rewriting of the request path and defining custom headers.
 - Fine-grained control over which paths are passed through to the backend.
 - Support for rewriting of the request path.
 - Customizable request and response headers.
+- Integrated health check and load measurement functionality.
 
 ## Installation
 

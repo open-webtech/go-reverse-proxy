@@ -9,9 +9,12 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
+	"sync/atomic"
+	"time"
 
 	"github.com/haoxins/rewrite"
 	"github.com/julienschmidt/httprouter"
+	"github.com/secondtruth/go-reverse-proxy/health"
 	httputilx "github.com/secondtruth/go-reverse-proxy/httputil"
 )
 
@@ -30,6 +33,8 @@ type ReverseProxyMux struct {
 	remote    *url.URL
 	router    *httprouter.Router
 	modifiers ResponseModifierMap
+	health    *health.HealthCheck
+	load      int32
 
 	Transport               http.RoundTripper
 	RequestHeader           http.Header
@@ -50,12 +55,16 @@ func New(remote string) (*ReverseProxyMux, error) {
 		remote:    remoteUrl,
 		router:    httprouter.New(),
 		modifiers: make(ResponseModifierMap),
+		health:    health.NewHealthCheck(remoteUrl),
 	}
 	return pm, nil
 }
 
 // ServeHTTP handles the HTTP request.
 func (pm *ReverseProxyMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	atomic.AddInt32(&pm.load, 1)
+	defer atomic.AddInt32(&pm.load, -1)
+
 	pm.proxy.ModifyResponse = func(r *http.Response) error {
 		if pm.ModifyResponse != nil {
 			if err := pm.ModifyResponse(r); err != nil {
@@ -146,4 +155,19 @@ func (pm *ReverseProxyMux) RewritePath(methods, sourcePath, targetPath string) *
 	route := NewRoute(methods, sourcePath)
 	route.RewritePath = targetPath
 	return pm.HandlePath(route)
+}
+
+// IsAvailable returns whether the proxy origin was successfully connected at the last check time.
+func (p *ReverseProxyMux) IsAvailable() bool {
+	return p.health.IsAvailable()
+}
+
+// SetHealthCheckFunc sets the passed check func as the algorithm of checking the origin availability
+func (p *ReverseProxyMux) SetHealthCheckFunc(check func(addr *url.URL) bool, period time.Duration) {
+	p.health.SetCheckFunc(check, period)
+}
+
+// GetLoad returns the number of requests being served by the proxy at the moment
+func (p *ReverseProxyMux) GetLoad() int32 {
+	return atomic.LoadInt32(&p.load)
 }
