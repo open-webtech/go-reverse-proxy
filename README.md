@@ -15,7 +15,7 @@ it allows for rewriting of the request path and defining custom headers.
 
 To install `go-reverse-proxy`, use the following command:
 
-	go get -u github.com/secondtruth/go-reverse-proxy
+    go get -u github.com/open-webtech/go-reverse-proxy
 
 ## Usage
 
@@ -27,7 +27,7 @@ import (
 	"log"
 	"net/http"
 
-	reverseproxy "github.com/secondtruth/go-reverse-proxy"
+	reverseproxy "github.com/open-webtech/go-reverse-proxy"
 )
 
 func main() {

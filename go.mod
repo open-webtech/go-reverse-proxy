@@ -1,4 +1,4 @@
-module github.com/secondtruth/go-reverse-proxy
+module github.com/open-webtech/go-reverse-proxy
 
 go 1.21.0
 

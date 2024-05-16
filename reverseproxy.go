@@ -14,8 +14,8 @@ import (
 
 	"github.com/haoxins/rewrite"
 	"github.com/julienschmidt/httprouter"
-	"github.com/secondtruth/go-reverse-proxy/health"
-	httputilx "github.com/secondtruth/go-reverse-proxy/httputil"
+	"github.com/open-webtech/go-reverse-proxy/health"
+	httputilx "github.com/open-webtech/go-reverse-proxy/httputil"
 )
 
 // ResponseModifier is a function that modifies the HTTP response.
